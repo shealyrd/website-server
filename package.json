@@ -1,0 +1,10 @@
+{
+  "name"         : "John_Henry",
+  "version"      : "0.0.0",
+  "description"  : "Simple todo application.",
+  "main"         : "full_server.js",
+  "author"       : "Evan",
+  "dependencies" : {
+    "adm-zip"         : "^0"
+  }
+}

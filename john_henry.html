@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)http://codemirror.net/demo/theme.html#duotone-light -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>John Henry Compiler</title>
+<link rel="stylesheet" href="./codemirror/docs.css">
+<link rel="stylesheet" href="./codemirror/codemirror.css">
+<link rel="stylesheet" href="./codemirror/duotone-light.css">
+<script src="./codemirror/codemirror.js.download"></script>
+<script src="./codemirror/javascript.js.download"></script>
+<script src="./codemirror/active-line.js.download"></script>
+<script src="./codemirror/matchbrackets.js.download"></script>
+<style type="text/css">
+      .CodeMirror {border: 1px solid black; font-size:13px}
+    </style>
+</head>
+<body>
+
+<article>
+<h2><div id="logoDiv"><img class="logo" src="John_Henry_2.png"></div></h2>
+<form action="http://projectcard-91355.onmodulus.net/john-henry/" method="POST" enctype='text/plain'>
+	<textarea id="textarea" name="textarea" style="display: none;">
+Layout base = {
+	"root" : "LinearLayout",
+	"namespaces" : {
+		"android": "http://schemas.android.com/apk/res/android"
+	}
+};
+
+base.orientation = "horizontal";
+base.setMatchParent();
+
+TextView content_hello = {};
+content_hello.setWrapContent();
+TextView content_world = content_hello.copy();
+
+content_hello.text = "Hello";
+content_world.text = "World";
+
+base.addChild(content_hello);
+base.addChild(content_world);
+
+GenerateIds();
+Colorify();
+
+Project.emitXml("hello_world_example", base);
+Project.emitJson("hello_world_example", base);</textarea>
+	<input type="submit" value="Compile">
+</form>
+
+<section id=config>
+    <h2>John Henry: Android Layout Composition</h2>
+
+    <p>John Henry is a micro-script for fast, javascript-like Android layout compilation. Google's current approach to Android's layout XML is frankly indefensible: code reuse and modularization is indirect, painful or often simply impossible. With John Henry, XML nodes can be quickly defined and handled as objects rather than static text.</p>
+
+
+
+    <dl>
+      <dt id="option_value"><code><strong>Layout</strong>:</code></dt>
+      <dd>All definable objects in John Henry are Layouts. Layouts can be defined as JSON objects with the following properties:</dd>
+	  
+	   <pre data-lang="text/html">Layout my_layout = {
+        &quot;root&quot; : &quot;&quot;,
+        &quot;namespaces&quot; : {},
+        &quot;children&quot; : [],
+        &quot;android&quot; : {}
+};</pre>
+      <dt id="option_value"><code><strong>root</strong> defines the string for the root tag.</code></dt>
+	  <dt id="option_value"><code><strong>namespaces</strong> is a collection of [string: string] key-value pairs denoting &quot;namespace_name&quot;: &quot;namespace_uri&quot;.</code></dt>
+	  <dt id="option_value"><code><strong>children</strong> is an array of layout object names.</code></dt>
+	  <dt id="option_value"><code><strong>android</strong> defines attributes in the layout object. It is a collection of [string: string] key-value pairs defining &quot;attribute_name&quot;: &quot;attribute_value&quot;.</code></dt>
+	</dl>
+	
+	 <p>Example:</p>
+	 <dl>
+	   <pre data-lang="text/html">Layout base = {
+    &quot;root&quot; : &quot;RelativeLayout&quot;,
+    &quot;namespaces&quot; : {&quot;android&quot;: &quot;http://schemas.android.com/apk/res/android&quot;},
+    &quot;children&quot; : {},
+    &quot;android&quot; : {
+	&quot;layout_width&quot;: &quot;match_parent&quot;,
+	&quot;layout_height&quot;: &quot;match_parent&quot;
+	}
+};</pre>
+	</dl>
+	<p>Represents the following:</p>
+		 <dl>
+	   <pre data-lang="text/html">&lt;RelativeLayout
+	xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+	android:layout_width=&quot;match_parent&quot;
+	android:layout_height=&quot;match_parent&quot;
+/&gt;</pre>
+	</dl>
+	
+	<p>Further properties can be added to signify attributes in different namespaces:</p>
+		 <dl>
+	   <pre data-lang="text/html">Layout base = {
+    "root" : "RelativeLayout",
+    "namespaces" : {
+	"android": "http://schemas.android.com/apk/res/android",
+	"app": "http://schemas.android.com/apk/res-auto"}
+    },
+    "children" : [];
+    "android" : {
+	"layout_width": "match_parent",
+	"layout_height": "match_parent"
+    },
+    "app" : {
+	"layout_widthPercent": "100%",
+	"layout_heightPercent": "100%"
+    }
+};</pre>
+	</dl>
+		<p>Represents the following:</p>
+		<dl>
+	   <pre data-lang="text/html">&lt;RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	app:layout_widthPercent="100%"
+	app:layout_heightPercent="100%"
+/&gt;</pre>
+	</dl>
+	
+<p>NOTE: John Henry layout objects do not behave as Javascript objects. Direct property assignment using layout.property = "value" does not add to the above JSON, but rather adds a new android namespace attribute. In this way, attributes can simply be added to layout objects using javascript property notation:</p>
+<dl>
+<pre data-lang="text/html">base.gravity = "center";</pre>
+</dl>
+<p>Some property names are protected:</p>
+<dt id="option_value"><code><strong>layout.root</strong> sets the root tag property.</code></dt>
+<dt id="option_value"><code><strong>layout.namespaces</strong> adds a new namespace entry.</code></dt>
+<p>So the above JSON object can be created like so:</p>
+<pre data-lang="text/html">	Layout base = {};
+	base.root = "RelativeLayout";
+	base.namespaces.android = "http://schemas.android.com/apk/res/android";
+	base.namespaces.app = "http://schemas.android.com/apk/res/android";
+	base.layout_width = "match_parent";
+	base.layout_height = "match_parent";
+	base.app.layout_widthPercent = "100%";
+	base.app.layout_heightPercent = "100%";</pre>
+<p>Layout objects can also have their root tags generated automatically by including the class name in the object definition;</p>
+<pre data-lang="text/html">RelativeLayout base = {};</pre>
+<p>Is equivalent to:</p>
+<pre data-lang="text/html">Layout base = {};
+base.root = "RelativeLayout";</pre>
+<p>Layout objects currently have two methods:</p>
+<dt id="option_value"><code><strong>Layout.addChild(child_layout)</strong></code></dt>
+<dt id="option_value"><code><strong>Layout.copy()</strong> - used in object definitions, copies the layout by value.</code></dt>
+<p></p>
+<p>Example:</p>
+<pre data-lang="text/html">Layout base = {
+    "root" : "RelativeLayout",
+    "namespaces" : {"android": "http://schemas.android.com/apk/res/android"},
+    "children" : {},
+    "android" : {
+	"layout_width": "match_parent",
+	"layout_height": "match_parent"
+	}
+};
+	
+Layout copiedBase = base.copy();
+base.addChild(copiedBase);</pre>
+<p>Produces the following output:</p>
+<pre data-lang="text/html">&lt;RelativeLayout
+	xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+	android:layout_width=&quot;match_parent&quot;
+	android:layout_height=&quot;match_parent&quot;
+&gt;
+	&lt;RelativeLayout
+		xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+		android:layout_width=&quot;match_parent&quot;
+		android:layout_height=&quot;match_parent&quot;
+	/&gt;
+&lt;/RelativeLayout&gt;</pre>
+</section>
+ <dt id="option_value"><code><strong>Project</strong>:</code></dt>
+      <dd>The Project object is a global object which represents a directory to which the output is added. When the John Henry code is submitted, the browser will automatically download the Project object as a zip file.</dd>
+<p></p>
+<dt id="option_value"><code><strong>Project.emitXml("filename", layout_object)</strong> - Writes to the Project directory a file "filename.xml" containing the XML representation of layout_object.</code></dt>
+<dt id="option_value"><code><strong>Project.emitJson("filename", layout_object)</strong> - Writes to the Project directory a file "filename.json" containing the JSON representation of layout_object.</code></dt>
+<p></p>
+<p>There are currently two global functions:</p>
+<dt id="option_value"><code><strong>GenerateIds()</strong> - For all currently defined layout objects, adds an android:id attribute whose value is the object name.</code></dt>
+<dt id="option_value"><code><strong>Colorify()</strong> - For all currently defined layout objects, adds an android:background attribute whose value is a randomly generated color.</code></dt>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p><a href = "index.html"> &lt; Back to main site</a></p>
+<script>
+  var editor = CodeMirror.fromTextArea(document.getElementById("textarea"), {
+    lineNumbers: true,
+    styleActiveLine: true,
+    matchBrackets: true
+  });
+  var input = document.getElementById("select");
+  editor.setOption("theme", "duotone-light");
+  editor.setSize("100%", 420);
+</script>
+  </article>
+</body></html>
